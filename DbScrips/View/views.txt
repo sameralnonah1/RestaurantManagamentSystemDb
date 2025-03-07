@@ -1,0 +1,36 @@
+
+CREATE VIEW AvailableMenuItems AS
+SELECT 
+    name,
+    category,
+    price
+FROM Menu
+WHERE availability = 1;
+
+/////////////////////////////////////////////////////////////////////////
+
+CREATE VIEW DailyReservations AS
+SELECT 
+    customerName,
+    contact,
+    tableNumber,
+    reservationDate
+FROM Reservation
+WHERE reservationDate ='2025-03-02 18:17:50.787'; 
+
+
+//////////////////////////////////////////////////////////////////////////
+
+CREATE VIEW SalesSummary AS
+SELECT 
+    m.category,
+    m.name AS menuItem,
+    SUM(od.quantity) AS totalQuantitySold,
+    SUM(od.quantity * m.price) AS totalRevenue
+FROM OrderDetails od
+JOIN [Order] o ON od.orderId = o.id
+JOIN Menu m ON od.menuId = m.id
+GROUP BY m.category, m.name;
+
+/////////////////////////////////////////////////
+

@@ -1,0 +1,24 @@
+
+INSERT INTO Person (fullName, contact, email, createBy) VALUES
+('John Doe', '123456789', 'john.doe@example.com', 'System'),
+('Alice Smith', '987654321', 'alice.smith@example.com', 'System');
+
+INSERT INTO Admin (id, password) VALUES (1, 'adminpass123');
+
+INSERT INTO Staff (id, role, shiftTiming, attendance) VALUES (2, 'Waiter', 'Morning', 1);
+
+INSERT INTO Menu (name, category, price, availability, discount) VALUES
+('Pizza', 'Food', 12.99, 1, 10.00),
+('Burger', 'Food', 8.99, 1, 5.00),
+('Pasta', 'Food', 10.99, 1, 0.00),
+('Coke', 'Drink', 2.99, 1, 0.00),
+('Coffee', 'Drink', 3.99, 1, 0.00);
+
+INSERT INTO Orders (tableNumber, customerName, totalAmount) VALUES (5, 'Mike Johnson', 22.98);
+
+INSERT INTO OrderDetails (orderID, menuID, quantity) VALUES (1, 1, 2);
+
+INSERT INTO Reservation (customerName, contact, numGuests, reservationDate, tableNumber) VALUES
+('Sarah Lee', '555555555', 4, '2025-03-10 19:00:00', 3);
+
+INSERT INTO Attendance (staffID, status) VALUES (2, 'Present');

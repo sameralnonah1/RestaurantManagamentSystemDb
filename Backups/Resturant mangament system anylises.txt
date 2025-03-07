@@ -1,0 +1,62 @@
+1- Define Scope (Restaurant Management System)
+
+2- Mandatory Objects (Menu - Order - Reservation - Staff - Admin)
+
+3- Software Type (Customized) - (Requirement Techniques)
+
+4- Summarizing System Objects (Abstract Action)
+   
+   (id, createBy, updateBy, isActive, updateDate, creationDate)
+
+   A- Admin (fullName, email, password)
+   B- Menu (name, category, price, availability, discount)
+   C- Order (tableNumber, customerName, orderDate, status, totalAmount)
+   D- OrderDetails (orderID, menuID, quantity)
+   E- Reservation (customerName, contact, numGuests, reservationDate, tableNumber)
+   F- Staff (fullName, role, shiftTiming, attendance, contact)
+
+5- Generalization and Specialization (Restructuring)
+   
+   --> Admin, Staff ---> Person
+   --> Person, Menu, Order, Reservation ---> ParentEntity
+
+6- Define Relationships
+
+   1) Inheritance
+      
+      A - Combine everything in one table (Person)
+      B - Create child tables and add shared elements individually
+      C - Create Parent and Child and build relationships between them   
+      
+   2) Composition
+      
+      Person (1-M) Reservation (M-M) Order (1-M) OrderDetails
+      Menu (1-M) OrderDetails
+      Order (1-M) OrderDetails (Weak Entity)
+      
+      Single dependent -----> Weak Entity
+      Multi-dependent -----> Relationship
+      
+   3) Association
+
+============================ Result 1 ==============================
+System Object and Relationships
+===================================================================
+
+7- Implement ER Diagram
+
+   Person (1-M) Reservation
+   Order (1-M) OrderDetails
+   Menu (1-M) OrderDetails
+   Staff (1-M) Attendance
+
+8- Implement Database (Tables and Constraints)
+
+   A- Denormalization (Actors, Objects)
+      /Normalization (Actors, Objects, Lookups (category, role))
+
+   1- id, Name
+
+9- Fill Testing Data (at least 5 rows in each table)
+
+

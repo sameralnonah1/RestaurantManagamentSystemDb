@@ -1,0 +1,187 @@
+SELECT name, price, availability
+FROM Menu
+WHERE category = 'Main Course';
+
+///////////////////////////////////////////////////////////////
+
+SELECT 
+    m.category,
+    m.name AS menuItem,
+    SUM(od.quantity) AS totalQuantitySold,
+    SUM(od.quantity * m.price) AS totalRevenue
+FROM OrderDetails od
+JOIN [Order] o ON od.orderId = o.id
+JOIN Menu m ON od.menuId = m.id
+WHERE o.orderDate = '2025-03-02'  
+GROUP BY m.category, m.name;
+
+//////////////////////////////////////////////////////////////////
+
+
+
+
+SELECT 
+    customerName,
+    contact,
+    numGuests,
+    reservationDate,
+    tableNumber
+FROM Reservation
+WHERE reservationDate = '2025-03-02 18:17:48.813'; 
+
+/////////////////////////////////////////////////////////////////
+
+SELECT 
+    s.fullName AS staffName,
+    a.attendanceDate,
+    a.status AS attendanceStatus
+FROM Attendance a
+JOIN Staff s ON a.staffId = s.id
+WHERE a.attendanceDate BETWEEN '2025-03-01' AND '2025-03-02'; 
+/////////////////////////////////////////////////////////////////////////
+
+
+CREATE VIEW AvailableMenuItems AS
+SELECT 
+    name,
+    category,
+    price
+FROM Menu
+WHERE availability = 1;
+
+/////////////////////////////////////////////////////////////////////////
+
+CREATE VIEW DailyReservations AS
+SELECT 
+    customerName,
+    contact,
+    tableNumber,
+    reservationDate
+FROM Reservation
+WHERE reservationDate ='2025-03-02 18:17:50.787'; 
+
+
+//////////////////////////////////////////////////////////////////////////
+
+CREATE VIEW SalesSummary AS
+SELECT 
+    m.category,
+    m.name AS menuItem,
+    SUM(od.quantity) AS totalQuantitySold,
+    SUM(od.quantity * m.price) AS totalRevenue
+FROM OrderDetails od
+JOIN [Order] o ON od.orderId = o.id
+JOIN Menu m ON od.menuId = m.id
+GROUP BY m.category, m.name;
+
+/////////////////////////////////////////////////
+
+
+DELIMITER $$
+
+CREATE PROCEDURE AddNewOrder(
+    IN p_tableNumber INT,
+    IN p_customerName VARCHAR(255),
+    IN p_items JSON  
+)
+BEGIN
+    DECLARE totalAmount DECIMAL(10, 2) DEFAULT 0;
+    DECLARE itemId INT;
+    DECLARE itemQuantity INT;
+    DECLARE itemPrice DECIMAL(10, 2);
+
+    INSERT INTO [Order] (tableNumber, customerName, status, totalAmount)
+    VALUES (p_tableNumber, p_customerName, 'Pending', 0);
+
+    SET @orderId = LAST_INSERT_ID();
+    
+ 
+    DECLARE i INT DEFAULT 0;
+    WHILE i < JSON_LENGTH(p_items) DO
+        SET itemId = JSON_UNQUOTE(JSON_EXTRACT(p_items, CONCAT('$[', i, '].menuId')));
+        SET itemQuantity = JSON_UNQUOTE(JSON_EXTRACT(p_items, CONCAT('$[', i, '].quantity')));
+        
+
+        SELECT price INTO itemPrice FROM Menu WHERE id = itemId;
+        
+    
+        INSERT INTO OrderDetails (orderId, menuId, quantity)
+        VALUES (@orderId, itemId, itemQuantity);
+        
+
+        SET totalAmount = totalAmount + (itemQuantity * itemPrice);
+        
+        SET i = i + 1;
+    END WHILE;
+    
+ 
+    UPDATE [Order]
+    SET totalAmount = totalAmount
+    WHERE id = @orderId;
+END $$
+
+DELIMITER ;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+DELIMITER $$
+
+CREATE PROCEDURE ManageReservation(
+    IN p_customerName VARCHAR(255),
+    IN p_contact VARCHAR(50),
+    IN p_numGuests INT,
+    IN p_reservationDate DATETIME,
+    IN p_tableNumber INT
+)
+BEGIN
+   
+    IF EXISTS (SELECT 1 FROM Reservation WHERE tableNumber = p_tableNumber AND reservationDate = p_reservationDate) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Table is already reserved at this time.';
+    ELSE
+       
+        INSERT INTO Reservation (customerName, contact, numGuests, reservationDate, tableNumber)
+        VALUES (p_customerName, p_contact, p_numGuests, p_reservationDate, p_tableNumber);
+    END IF;
+END $$
+
+DELIMITER ;
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+DELIMITER $$
+
+CREATE PROCEDURE GenerateStaffReport(
+    IN p_startDate DATETIME,
+    IN p_endDate DATETIME
+)
+BEGIN
+    SELECT 
+        s.fullName AS staffName,
+        COUNT(a.id) AS attendanceCount,
+        SUM(CASE WHEN a.status = 'Present' THEN 1 ELSE 0 END) AS daysPresent,
+        SUM(CASE WHEN a.status = 'Absent' THEN 1 ELSE 0 END) AS daysAbsent
+    FROM Attendance a
+    JOIN Staff s ON a.staffId = s.id
+    WHERE a.attendanceDate BETWEEN p_startDate AND p_endDate
+    GROUP BY s.id;
+END $$
+
+DELIMITER ;
+
+
+////////////////////////////////////////////////////////////////////
+
+DELIMITER $$
+
+CREATE PROCEDURE UpdateMenuAvailability(
+    IN p_menuId INT,
+    IN p_availability BOOLEAN
+)
+BEGIN
+    UPDATE Menu
+    SET availability = p_availability
+    WHERE id = p_menuId;
+END $$
+
+DELIMITER ;

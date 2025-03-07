@@ -1,0 +1,75 @@
+CREATE TABLE Person (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    fullName VARCHAR(100) NOT NULL,
+    contact VARCHAR(20),
+    email VARCHAR(100) UNIQUE,
+    createBy VARCHAR(50),
+    updateBy VARCHAR(50),
+    isActive BOOLEAN DEFAULT 1,
+    updateDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    creationDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+ 2. Admin Table
+CREATE TABLE Admin (
+    id INT PRIMARY KEY,
+    password VARCHAR(255) NOT NULL,
+    FOREIGN KEY (id) REFERENCES Person(id) ON DELETE CASCADE
+);
+
+3. Staff Table 
+CREATE TABLE Staff (
+    id INT PRIMARY KEY,
+    role VARCHAR(50),
+    shiftTiming VARCHAR(50),
+    attendance BOOLEAN DEFAULT 1,
+    FOREIGN KEY (id) REFERENCES Person(id) ON DELETE CASCADE
+);
+
+ 4. Menu Table
+CREATE TABLE Menu (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    category VARCHAR(50),
+    price DECIMAL(10,2) NOT NULL,
+    availability BOOLEAN DEFAULT 1,
+    discount DECIMAL(5,2) DEFAULT 0
+);
+
+ 5. Order Table
+CREATE TABLE Orders (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tableNumber INT,
+    customerName VARCHAR(100),
+    orderDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status ENUM('Pending', 'Completed', 'Cancelled') DEFAULT 'Pending',
+    totalAmount DECIMAL(10,2) DEFAULT 0
+);
+ 6. OrderDetails (Weak Entity, depends on Orders and Menu)
+CREATE TABLE OrderDetails (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    orderID INT,
+    menuID INT,
+    quantity INT NOT NULL,
+    FOREIGN KEY (orderID) REFERENCES Orders(id) ON DELETE CASCADE,
+    FOREIGN KEY (menuID) REFERENCES Menu(id) ON DELETE CASCADE
+);
+
+7. Reservation Table
+CREATE TABLE Reservation (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    customerName VARCHAR(100) NOT NULL,
+    contact VARCHAR(20),
+    numGuests INT NOT NULL,
+    reservationDate TIMESTAMP NOT NULL,
+    tableNumber INT NOT NULL
+);
+
+8. Attendance Table (for Staff Attendance Tracking)
+CREATE TABLE Attendance (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    staffID INT,
+    attendanceDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status ENUM('Present', 'Absent', 'Late') DEFAULT 'Present',
+    FOREIGN KEY (staffID) REFERENCES Staff(id) ON DELETE CASCADE
+);
